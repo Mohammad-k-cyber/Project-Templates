@@ -1,0 +1,421 @@
+# Project Integration Contract - Basic Database Setup
+
+```yaml
+# ===================================================================
+# INTELLIGENT TEXT EXTRACTION SYSTEM INTEGRATION CONTRACT
+# Version: 1.0
+# ===================================================================
+
+project_info:
+  project_name: "Intelligent Text Extraction System"
+  version: "MVP 1.0"
+  contract_date: "2025-09-04"
+
+# -------------------------------------------------------------------
+# TASK IDENTIFICATION
+# -------------------------------------------------------------------
+task_identity:
+  task_id: "MVP-1.1.1"           
+  task_name: "Basic Database Setup"
+  responsible_team: "Database Team"
+  team_members: ["Aws", "Sundus", "Osama"]
+  phase: "Phase One - Infrastructure"
+  priority: "critical"
+  estimated_effort: "14 person-days"
+  estimated_duration: "2 weeks"
+  start_date: "2025-09-10"
+  target_completion: "2025-09-24"
+  current_status: "planning"
+
+# -------------------------------------------------------------------
+# DEPENDENCIES & PREREQUISITES
+# -------------------------------------------------------------------
+dependencies:
+  blocking_tasks: []
+      
+  input_requirements:
+    - name: "Database Requirements"
+      type: "file"
+      format: "docx"
+      source: "System Analysis Team"
+      required: true
+      validation_criteria: "Document signed by Project Manager containing Entity Relationship Diagrams"
+      
+  external_dependencies:
+    - name: "PostgreSQL"
+      type: "database"
+      version: "14.x or newer"
+      availability: "available"
+    
+    - name: "SQLite"
+      type: "database"
+      version: "3.x"
+      availability: "available"
+
+# -------------------------------------------------------------------
+# DELIVERABLES SPECIFICATION
+# -------------------------------------------------------------------
+deliverables:
+  # Database
+  database:
+    - operation: "create"
+      object_type: "database"
+      name: "text_extraction_db"
+      description: "Central database for text extraction system"
+      schema: |
+        -- Users table
+        CREATE TABLE users (
+          id SERIAL PRIMARY KEY,
+          username VARCHAR(50) UNIQUE NOT NULL,
+          password_hash VARCHAR(128) NOT NULL,
+          email VARCHAR(100) UNIQUE NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_login TIMESTAMP,
+          is_active BOOLEAN DEFAULT TRUE,
+          role VARCHAR(20) DEFAULT 'user'
+        );
+        
+        -- Files table
+        CREATE TABLE files (
+          id SERIAL PRIMARY KEY,
+          filename VARCHAR(255) NOT NULL,
+          file_path VARCHAR(500) NOT NULL,
+          file_size INTEGER NOT NULL,
+          file_type VARCHAR(20) NOT NULL,
+          upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          user_id INTEGER REFERENCES users(id),
+          status VARCHAR(20) DEFAULT 'uploaded',
+          processing_start TIMESTAMP,
+          processing_end TIMESTAMP
+        );
+        
+        -- Extracted texts table
+        CREATE TABLE extracted_texts (
+          id SERIAL PRIMARY KEY,
+          file_id INTEGER REFERENCES files(id),
+          text_content TEXT,
+          language VARCHAR(20),
+          word_count INTEGER,
+          character_count INTEGER,
+          extraction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          quality_score FLOAT
+        );
+        
+        -- Conversations table
+        CREATE TABLE conversations (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id),
+          start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          end_time TIMESTAMP,
+          status VARCHAR(20) DEFAULT 'active'
+        );
+        
+        -- Conversation messages table
+        CREATE TABLE conversation_messages (
+          id SERIAL PRIMARY KEY,
+          conversation_id INTEGER REFERENCES conversations(id),
+          sender_type VARCHAR(10) NOT NULL, -- 'user' or 'system'
+          message_text TEXT NOT NULL,
+          message_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          related_file_id INTEGER REFERENCES files(id)
+        );
+        
+        -- Create indexes
+        CREATE INDEX idx_files_user ON files(user_id);
+        CREATE INDEX idx_files_status ON files(status);
+        CREATE INDEX idx_extracted_texts_file ON extracted_texts(file_id);
+        CREATE INDEX idx_conversations_user ON conversations(user_id);
+        CREATE INDEX idx_messages_conversation ON conversation_messages(conversation_id);
+      access_permissions: ["read", "write"]
+      backup_requirements: "daily"
+      
+  # Services
+  services:
+    - name: "JWT Authentication Service"
+      type: "microservice"
+      deployment_method: "container"
+      dependencies: ["PostgreSQL"]
+      health_check: "/auth/health"
+      monitoring: ["login_attempts", "token_generation", "token_validation"]
+      
+    - name: "Backup Service"
+      type: "utility"
+      deployment_method: "scheduled_job"
+      dependencies: ["PostgreSQL"]
+      health_check: "Daily backup report"
+      monitoring: ["backup_size", "backup_time", "backup_success"]
+      
+# -------------------------------------------------------------------
+# INTEGRATION POINTS
+# -------------------------------------------------------------------
+integration:
+  provides_to:
+    - consumer_task: "MVP-1.1.2"
+      consumer_team: "File Upload System Team"
+      data_type: "API for storing uploaded file information"
+      delivery_method: "api"
+      delivery_format: "RESTful API + Swagger documentation"
+      delivery_schedule: "real_time"
+      sla_requirements: "response time < 200ms, availability > 99%"
+      
+    - consumer_task: "MVP-1.1.3"
+      consumer_team: "Content Extraction Team"
+      data_type: "API for storing extracted texts"
+      delivery_method: "api"
+      delivery_format: "RESTful API + Swagger documentation"
+      delivery_schedule: "real_time"
+      sla_requirements: "response time < 200ms, availability > 99%"
+      
+  consumes_from: []
+
+# -------------------------------------------------------------------
+# QUALITY REQUIREMENTS
+# -------------------------------------------------------------------
+quality_standards:
+  performance:
+    - metric: "Query response time"
+      target: "< 200 milliseconds for simple queries"
+      measurement_method: "Performance testing using JMeter"
+    - metric: "Throughput"
+      target: "100 write operations per second"
+    - metric: "Resource usage"
+      target: "< 30% CPU, < 2 GB memory"
+      
+  reliability:
+    - uptime: "> 99%"
+    - error_rate: "< 0.5%"
+    - recovery_time: "< 5 minutes"
+    
+  security:
+    - authentication: "required"
+    - authorization: "role_based"
+    - data_encryption: "at_rest"
+    - audit_logging: "all_operations"
+    
+  scalability:
+    - concurrent_users: "100 simultaneous users"
+    - data_volume: "up to 500,000 records"
+    - growth_capacity: "50% annual increase"
+
+# -------------------------------------------------------------------
+# TESTING STRATEGY
+# -------------------------------------------------------------------
+testing:
+  unit_tests:
+    coverage_target: "80% minimum"
+    framework: "JUnit and Mockito"
+    automation: true
+    
+  integration_tests:
+    test_scenarios:
+      - scenario: "Normal operation"
+        description: "Test typical workflow"
+      - scenario: "Error conditions"
+        description: "Test failure handling"
+      - scenario: "Load conditions"
+        description: "Test under expected load"
+        
+  acceptance_criteria:
+    - criterion: "Successful creation of all tables and relationships"
+      test_method: "Database schema audit"
+      success_criteria: "Full compliance with ER diagrams"
+    
+    - criterion: "Response times within specified limits"
+      test_method: "Performance testing using JMeter"
+      success_criteria: "All queries respond in less than 200ms"
+    
+    - criterion: "Successful password encryption"
+      test_method: "Login and registration testing"
+      success_criteria: "Passwords stored encrypted and function correctly"
+    
+    - criterion: "JWT system working correctly"
+      test_method: "Login and token reuse testing"
+      success_criteria: "Successful token usage and verification"
+      
+  test_data:
+    requirements: "Test data for users and files"
+    source: "Automated test data generator"
+    privacy_considerations: "Avoid using real data in test environment"
+
+# -------------------------------------------------------------------
+# OPERATIONAL REQUIREMENTS
+# -------------------------------------------------------------------
+operations:
+  monitoring:
+    health_checks:
+      - endpoint: "/db/health"
+        expected_response: "200 OK with status information"
+        frequency: "every 30 seconds"
+        
+    metrics:
+      - name: "db_connections"
+        type: "gauge"
+        description: "Number of active database connections"
+        alert_thresholds: "More than 80% of maximum connections"
+        
+      - name: "query_time"
+        type: "histogram"
+        description: "Query execution time"
+        alert_thresholds: "More than 500ms"
+        
+    logging:
+      level: "INFO"
+      format: "structured"
+      retention: "30 days"
+      sensitive_data: "mask"
+      
+  deployment:
+    environment: "development, production"
+    method: "automated"
+    rollback_strategy: "Pre-update backup with automated recovery procedures"
+    downtime_requirements: "Less than 10 minutes for scheduled updates"
+    
+  maintenance:
+    backup_frequency: "daily"
+    update_schedule: "monthly for security updates"
+    maintenance_windows: "Friday 1:00-3:00 AM"
+
+# -------------------------------------------------------------------
+# DOCUMENTATION REQUIREMENTS
+# -------------------------------------------------------------------
+documentation:
+  technical_docs:
+    - type: "Database Documentation"
+      location: "docs/database/schema.md"
+      format: "markdown + diagrams"
+      
+    - type: "API Guide"
+      location: "docs/api/database_api.md"
+      audience: "developers"
+      
+    - type: "Deployment Guide"
+      location: "docs/deployment/database_setup.md"
+      audience: "operations team"
+      
+  code_docs:
+    inline_comments: "comprehensive"
+    readme_file: "required with setup instructions"
+    examples: "Working examples of common queries"
+
+# -------------------------------------------------------------------
+# RISK MANAGEMENT
+# -------------------------------------------------------------------
+risks:
+  technical_risks:
+    - risk: "Performance bottleneck with increased load"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Advance performance testing and query/index optimization"
+      contingency: "Implement data sharding if necessary"
+      
+  integration_risks:
+    - risk: "Integration issues with other tasks"
+      probability: "low"
+      impact: "high"
+      mitigation: "Weekly coordination meetings"
+      contingency: "Provide alternative interfaces and error handling plans"
+      
+  operational_risks:
+    - risk: "Data loss"
+      probability: "low"
+      impact: "high"
+      mitigation: "Regular backup system"
+      contingency: "Data recovery from backups"
+
+# -------------------------------------------------------------------
+# COMMUNICATION PLAN
+# -------------------------------------------------------------------
+communication:
+  status_reporting:
+    frequency: "weekly"
+    method: "meeting + written report"
+    recipients: ["Team Lead", "Project Manager", "Consuming Teams"]
+    
+  milestone_notifications:
+    events: ["task_start", "tables_creation", "auth_system_setup", "completion"]
+    notification_method: "email + Slack"
+    
+  issue_escalation:
+    level_1: "Team internal discussion"
+    level_2: "Cross-team coordination"
+    level_3: "Management involvement"
+    response_sla: "< 4 hours for blocking issues"
+    
+  handover_process:
+    demo_required: true
+    training_sessions: "One session per consuming team (2 hours)"
+    support_period: "4 weeks post-delivery"
+    documentation_walkthrough: true
+
+# -------------------------------------------------------------------
+# CHANGE MANAGEMENT
+# -------------------------------------------------------------------
+change_control:
+  change_approval:
+    minor_changes: "team_lead approval"
+    major_changes: "affected_teams + management approval"
+    
+  impact_assessment:
+    timeline_impact: "How changes affect delivery dates"
+    resource_impact: "Additional resources needed"
+    integration_impact: "Effect on other teams"
+    
+  version_control:
+    branching_strategy: "feature_branches"
+    merge_requirements: "code_review + tests_passing"
+    release_tagging: "semantic versioning"
+
+# -------------------------------------------------------------------
+# SUCCESS CRITERIA
+# -------------------------------------------------------------------
+completion_criteria:
+  functional_requirements:
+    - requirement: "All specified features implemented"
+      verification: "Feature testing completed"
+      
+  quality_gates:
+    - gate: "Performance benchmarks met"
+      measurement: "Load testing results"
+    - gate: "Security review passed"
+      measurement: "Security audit completion"
+      
+  integration_verification:
+    - verification: "All consuming teams can successfully integrate"
+      method: "Integration testing with each consumer"
+      
+  documentation_complete:
+    - deliverable: "All required documentation provided"
+      standard: "Documentation review approved by consumers"
+
+# -------------------------------------------------------------------
+# SIGN-OFF
+# -------------------------------------------------------------------
+approvals:
+  task_owner: 
+    name: "Aws"
+    date: "2025-09-05"
+    
+  consuming_teams:
+    - team: "File Upload System Team"
+      representative: "Tala"
+      date: "2025-09-05"
+      
+    - team: "Content Extraction Team"
+      representative: "Ahmad"
+      date: "2025-09-05"
+      
+  project_manager:
+    name: "Sarah"
+    date: "2025-09-06"
+```
+
+## Task Summary
+
+This contract details the requirements for the Basic Database Setup task (MVP-1.1.1) for the Intelligent Text Extraction System project. The task includes:
+
+1. **Creating a central database** with tables for users, files, extracted texts, and conversations.
+2. **Implementing a basic security system** including password encryption and JWT authentication.
+3. **Setting up connection management** with connection pooling, error handling, and backup system.
+4. **Providing APIs** for the File Upload System team and Content Extraction team.
+
+The task is designed to meet the specified success criteria, including query response times under 200 milliseconds, database availability of 99% uptime, and the ability to support 100 concurrent users.
