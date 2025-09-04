@@ -1,0 +1,361 @@
+# ===================================================================
+# UNIVERSAL PROJECT INTEGRATION CONTRACT TEMPLATE
+# Version: 1.0
+# Use this template for any task in any multi-team project
+# ===================================================================
+
+project_info:
+  project_name: "Project Name"
+  version: "1.0"
+  contract_date: "YYYY-MM-DD"
+
+# -------------------------------------------------------------------
+# TASK IDENTIFICATION
+# -------------------------------------------------------------------
+task_identity:
+  task_id: "PROJ-PHASE.TEAM.TASK"           # e.g., "MVP-1.2.1"
+  task_name: "Descriptive Task Name"
+  responsible_team: "Team Name"
+  team_members: ["Member1", "Member2"]
+  phase: "Phase Number/Name"
+  priority: "critical | high | medium | low"
+  estimated_effort: "X person-days"
+  estimated_duration: "X weeks"
+  start_date: "YYYY-MM-DD"
+  target_completion: "YYYY-MM-DD"
+  current_status: "not_started | planning | in_progress | testing | completed | blocked | cancelled"
+
+# -------------------------------------------------------------------
+# DEPENDENCIES & PREREQUISITES
+# -------------------------------------------------------------------
+dependencies:
+  blocking_tasks: 
+    - task_id: "PROJ-X.Y.Z"
+      description: "What this task provides that we need"
+      required_deliverables: ["deliverable1", "deliverable2"]
+      
+  input_requirements:
+    - name: "input_name"
+      type: "data | file | service | api"
+      format: "json | csv | binary | rest_api | etc"
+      source: "source_task_id or external_system"
+      required: true | false
+      validation_criteria: "specific validation rules"
+      sample_data: |
+        Example of expected input format
+        
+  external_dependencies:
+    - name: "dependency_name"
+      type: "library | service | hardware | license"
+      version: "version_requirement"
+      availability: "available | needs_procurement | needs_approval"
+
+# -------------------------------------------------------------------
+# DELIVERABLES SPECIFICATION
+# -------------------------------------------------------------------
+deliverables:
+  # APIs (if applicable)
+  apis:
+    - name: "API Name"
+      base_url: "https://domain/api/version"
+      endpoints:
+        - path: "/endpoint"
+          method: "GET | POST | PUT | DELETE"
+          description: "What this endpoint does"
+          authentication: "none | api_key | oauth | jwt"
+          rate_limit: "X requests per minute"
+          request_schema: |
+            {
+              "field": "type",
+              "description": "field purpose"
+            }
+          response_schema: |
+            {
+              "status": "success | error",
+              "data": {},
+              "message": "string",
+              "metadata": {}
+            }
+          error_responses:
+            - code: 400
+              description: "Bad Request"
+            - code: 500
+              description: "Internal Server Error"
+              
+  # Database Changes (if applicable)
+  database:
+    - operation: "create | modify | delete"
+      object_type: "table | view | index | procedure"
+      name: "object_name"
+      description: "Purpose of this database object"
+      schema: |
+        CREATE TABLE example (
+          id VARCHAR(50) PRIMARY KEY,
+          data TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      access_permissions: ["read", "write", "delete"]
+      backup_requirements: "daily | weekly | real_time"
+      
+  # File Outputs (if applicable)
+  files:
+    - type: "config | data | log | report | binary"
+      location: "/path/to/files"
+      naming_convention: "pattern_YYYY-MM-DD_identifier.ext"
+      format: "json | csv | xml | binary | custom"
+      retention_policy: "X days/months/years"
+      access_control: "public | private | team_only"
+      
+  # Services/Components (if applicable)
+  services:
+    - name: "Service Name"
+      type: "microservice | library | utility | daemon"
+      deployment_method: "container | package | standalone"
+      dependencies: ["dep1", "dep2"]
+      health_check: "/health endpoint or method"
+      monitoring: ["metric1", "metric2"]
+      
+# -------------------------------------------------------------------
+# INTEGRATION POINTS
+# -------------------------------------------------------------------
+integration:
+  provides_to:
+    - consumer_task: "PROJ-X.Y.Z"
+      consumer_team: "Team Name"
+      data_type: "specific type of data/service provided"
+      delivery_method: "api | file | database | message_queue"
+      delivery_format: "format specification"
+      delivery_schedule: "real_time | batch | on_demand"
+      sla_requirements: "response_time < X ms, availability > Y%"
+      
+  consumes_from:
+    - provider_task: "PROJ-A.B.C"
+      provider_team: "Team Name"
+      data_type: "what we need from them"
+      access_method: "how we'll get the data"
+      frequency: "how often we need it"
+      fallback_strategy: "what to do if unavailable"
+
+# -------------------------------------------------------------------
+# QUALITY REQUIREMENTS
+# -------------------------------------------------------------------
+quality_standards:
+  performance:
+    - metric: "response_time"
+      target: "< X milliseconds"
+      measurement_method: "how to measure"
+    - metric: "throughput"
+      target: "X requests/operations per second"
+    - metric: "resource_usage"
+      target: "< X% CPU, < Y MB memory"
+      
+  reliability:
+    - uptime: "> 99.X%"
+    - error_rate: "< X%"
+    - recovery_time: "< X minutes"
+    
+  security:
+    - authentication: "required | optional"
+    - authorization: "role_based | attribute_based"
+    - data_encryption: "at_rest | in_transit | both"
+    - audit_logging: "all_operations | security_events"
+    
+  scalability:
+    - concurrent_users: "X simultaneous users"
+    - data_volume: "up to X records/GB"
+    - growth_capacity: "X% increase per period"
+
+# -------------------------------------------------------------------
+# TESTING STRATEGY
+# -------------------------------------------------------------------
+testing:
+  unit_tests:
+    coverage_target: "80% minimum"
+    framework: "testing_framework_name"
+    automation: true | false
+    
+  integration_tests:
+    test_scenarios:
+      - scenario: "Normal operation"
+        description: "Test typical usage flow"
+      - scenario: "Error conditions"
+        description: "Test failure handling"
+      - scenario: "Load conditions"
+        description: "Test under expected load"
+        
+  acceptance_criteria:
+    - criterion: "Specific measurable requirement"
+      test_method: "How to verify this requirement"
+      success_criteria: "What constitutes success"
+      
+  test_data:
+    requirements: "Type and volume of test data needed"
+    source: "Where test data comes from"
+    privacy_considerations: "Data anonymization requirements"
+
+# -------------------------------------------------------------------
+# OPERATIONAL REQUIREMENTS
+# -------------------------------------------------------------------
+operations:
+  monitoring:
+    health_checks:
+      - endpoint: "/health"
+        expected_response: "200 OK with status info"
+        frequency: "every 30 seconds"
+        
+    metrics:
+      - name: "metric_name"
+        type: "counter | gauge | histogram"
+        description: "What this metric measures"
+        alert_thresholds: "When to trigger alerts"
+        
+    logging:
+      level: "DEBUG | INFO | WARN | ERROR"
+      format: "structured | plain_text"
+      retention: "X days"
+      sensitive_data: "exclude | mask | encrypt"
+      
+  deployment:
+    environment: "development | staging | production"
+    method: "manual | automated | ci_cd"
+    rollback_strategy: "How to revert if issues occur"
+    downtime_requirements: "zero_downtime | scheduled_maintenance"
+    
+  maintenance:
+    backup_frequency: "daily | weekly"
+    update_schedule: "how often updates are applied"
+    maintenance_windows: "when maintenance can occur"
+
+# -------------------------------------------------------------------
+# DOCUMENTATION REQUIREMENTS
+# -------------------------------------------------------------------
+documentation:
+  technical_docs:
+    - type: "API Documentation"
+      location: "path/to/api_docs.md"
+      format: "markdown | swagger | postman"
+      
+    - type: "Integration Guide"
+      location: "path/to/integration.md"
+      audience: "consuming teams"
+      
+    - type: "Deployment Guide"
+      location: "path/to/deployment.md"
+      audience: "operations team"
+      
+  user_docs:
+    - type: "User Manual"
+      location: "path/to/user_guide.md"
+      audience: "end users"
+      
+  code_docs:
+    inline_comments: "comprehensive | minimal"
+    readme_file: "required with setup instructions"
+    examples: "working code samples"
+
+# -------------------------------------------------------------------
+# RISK MANAGEMENT
+# -------------------------------------------------------------------
+risks:
+  technical_risks:
+    - risk: "Performance bottleneck"
+      probability: "low | medium | high"
+      impact: "low | medium | high"
+      mitigation: "Specific steps to reduce risk"
+      contingency: "What to do if risk materializes"
+      
+  integration_risks:
+    - risk: "Dependency delay"
+      probability: "medium"
+      impact: "high"
+      mitigation: "Early coordination meetings"
+      contingency: "Alternative implementation approach"
+      
+  operational_risks:
+    - risk: "Resource constraints"
+      probability: "low"
+      impact: "medium"
+      mitigation: "Resource monitoring and alerts"
+      contingency: "Auto-scaling or manual intervention"
+
+# -------------------------------------------------------------------
+# COMMUNICATION PLAN
+# -------------------------------------------------------------------
+communication:
+  status_reporting:
+    frequency: "daily | weekly | bi_weekly"
+    method: "standup | email | dashboard"
+    recipients: ["team_lead", "consuming_teams"]
+    
+  milestone_notifications:
+    events: ["task_start", "50_percent_complete", "ready_for_testing", "completed"]
+    notification_method: "email | slack | project_tool"
+    
+  issue_escalation:
+    level_1: "Team internal discussion"
+    level_2: "Cross-team coordination"
+    level_3: "Management involvement"
+    response_sla: "< X hours for blocking issues"
+    
+  handover_process:
+    demo_required: true | false
+    training_sessions: "number and duration"
+    support_period: "X weeks post-delivery"
+    documentation_walkthrough: true | false
+
+# -------------------------------------------------------------------
+# CHANGE MANAGEMENT
+# -------------------------------------------------------------------
+change_control:
+  change_approval:
+    minor_changes: "team_lead approval"
+    major_changes: "cross_team + management approval"
+    
+  impact_assessment:
+    timeline_impact: "How changes affect delivery dates"
+    resource_impact: "Additional resources needed"
+    integration_impact: "Effect on other teams"
+    
+  version_control:
+    branching_strategy: "gitflow | feature_branches | trunk_based"
+    merge_requirements: "code_review + tests_passing"
+    release_tagging: "semantic versioning"
+
+# -------------------------------------------------------------------
+# SUCCESS CRITERIA
+# -------------------------------------------------------------------
+completion_criteria:
+  functional_requirements:
+    - requirement: "All specified features implemented"
+      verification: "Feature testing completed"
+      
+  quality_gates:
+    - gate: "Performance benchmarks met"
+      measurement: "Load testing results"
+    - gate: "Security review passed"
+      measurement: "Security audit completion"
+      
+  integration_verification:
+    - verification: "All consuming teams can successfully integrate"
+      method: "Integration testing with each consumer"
+      
+  documentation_complete:
+    - deliverable: "All required documentation provided"
+      standard: "Documentation review approved by consumers"
+
+# -------------------------------------------------------------------
+# SIGN-OFF
+# -------------------------------------------------------------------
+approvals:
+  task_owner: 
+    name: "Team Lead Name"
+    date: "YYYY-MM-DD"
+    
+  consuming_teams:
+    - team: "Team Name"
+      representative: "Name"
+      date: "YYYY-MM-DD"
+      
+  project_manager:
+    name: "PM Name"
+    date: "YYYY-MM-DD"
